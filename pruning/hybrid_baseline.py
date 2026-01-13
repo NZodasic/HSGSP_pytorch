@@ -1,4 +1,5 @@
 import os
+import torch.nn as nn
 from datetime import datetime
 from typing import Dict, Tuple, Optional, List
 import random
@@ -9,6 +10,8 @@ from pruning.pruning_strategy import PruningStrategy, LayerPruningConfig
 from models.model_utils import ModelUtils
 from utils.logger import Logger
 from training.frequency_regularizer import compute_spectral_entropy
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class HybridFrequencyBaseline:
     """
     Hybrid frequency-saliency baseline that combines DCT-based energy analysis
