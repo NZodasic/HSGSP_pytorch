@@ -18,18 +18,18 @@ class Config:
     input_shape_cifar100: Tuple[int, int, int] = (3, 32, 32)
     # ========== TRAINING CONFIGURATION ==========
     default_epochs: int = 200
-    initial_lr: float = 7e-4
+    initial_lr: float = 2e-3
     pruned_growth_lr: float = 1e-4 # default: 1e-4
-    min_lr: float = 1e-5 # default: 1e-5
+    min_lr: float = 1e-4 # default: 1e-5
     momentum: float = 0.9 # for SGD
     optimizer: str = 'adamw' # 'adam', 'adamw', 'sgd', 'rmsprop'
     # Learning rate schedule
     lr_schedule: str = 'cosine' # 'cosine', 'exponential', 'step'
-    lr_warmup_epochs: int = 5
+    lr_warmup_epochs: int = 10
     lr_decay_rate: float = 0.2
     lr_decay_steps: int = 60
     # Early Stopping (updated)
-    early_stopping_patience: int = 7
+    early_stopping_patience: int = 15
     early_stopping_min_delta: float = 1e-4
     reduce_lr_patience: int = 10
     reduce_lr_factor: float = 0.5
@@ -42,12 +42,12 @@ class Config:
     fine_tune_step_decay_epochs: int = 5
     # Regularization
     l2_regularization: float = 1e-4
-    batch_norm_momentum: float = 0.1
-    dropout_rate: float = 0.3 # convolutional dropout strength
+    batch_norm_momentum: float = 0.01
+    dropout_rate: float = 0.1 # convolutional dropout strength
     use_spatial_dropout: bool = True
-    spatial_dropout_rate: float = 0.25
-    fc_dropout_rate1: float = 0.4
-    fc_dropout_rate2: float = 0.3
+    spatial_dropout_rate: float = 0.05
+    fc_dropout_rate1: float = 0.1
+    fc_dropout_rate2: float = 0.05
     weight_decay: float = 1e-4
     # Label Smoothing
     label_smoothing: float = 0.1
@@ -69,8 +69,8 @@ class Config:
     simple_finetune_lr: float = 1e-5
     # ========== AUGMENTATION CONFIGURATION ==========
     use_mixup: bool = True
-    mixup_alpha: float = 0.4
-    mixup_prob: float = 0.5
+    mixup_alpha: float = 0.2
+    mixup_prob: float = 1.
     # ========== HYBRID BASELINE CONFIGURATION ==========
     hybrid_iterations: int = 20
     hybrid_prune_fraction: float = 0.07

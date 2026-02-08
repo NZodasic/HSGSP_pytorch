@@ -77,10 +77,14 @@ class CIFARDataLoader:  # FIXED: Renamed from DataLoader to avoid conflict
         ])
         
         augment_transform = transforms.Compose([
-            transforms.ToTensor(),
+            # PIL-based transforms (before ToTensor)
             transforms.RandomCrop(32, padding=4, padding_mode='reflect'),
             transforms.RandomHorizontalFlip(),
+            transforms.AutoAugment(policy=transforms.AutoAugmentPolicy.CIFAR10),
             transforms.ColorJitter(brightness=0.15, contrast=0.2, saturation=0.2),
+            # Convert to tensor
+            transforms.ToTensor(),
+            # Tensor-based transforms (after ToTensor)
             transforms.RandomErasing(p=0.5, scale=(0.0625, 0.25), ratio=(1.0, 1.0), value=0.0),
         ]) if self.config.data_augmentation else base_transform
         
@@ -133,10 +137,14 @@ class CIFARDataLoader:  # FIXED: Renamed from DataLoader to avoid conflict
         ])
         
         augment_transform = transforms.Compose([
-            transforms.ToTensor(),
+            # PIL-based transforms (before ToTensor)
             transforms.RandomCrop(32, padding=4, padding_mode='reflect'),
             transforms.RandomHorizontalFlip(),
+            transforms.AutoAugment(policy=transforms.AutoAugmentPolicy.CIFAR10),  # CIFAR10 policy works well for CIFAR100 too
             transforms.ColorJitter(brightness=0.15, contrast=0.2, saturation=0.2),
+            # Convert to tensor
+            transforms.ToTensor(),
+            # Tensor-based transforms (after ToTensor)
             transforms.RandomErasing(p=0.5, scale=(0.0625, 0.25), ratio=(1.0, 1.0), value=0.0),
         ]) if self.config.data_augmentation else base_transform
         
