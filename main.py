@@ -110,10 +110,10 @@ def main(args):
         logger.info(f"Trained model saved at {model_save_path}")
 
 
-        # visualizer.plot_training_history(
-        #     history,
-        #     save_path=os.path.join(config.plots_dir, 'training_history.png'),
-        # )
+        visualizer.plot_training_history(
+            history,
+            save_path=os.path.join(config.plots_dir, 'training_history.png'),
+        )
     
     # FIXED: Create baseline copy AFTER training for proper evaluation
     baseline_for_eval = None

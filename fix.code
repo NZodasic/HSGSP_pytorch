@@ -1,0 +1,62 @@
+# ===== COMPLETE FIX SCRIPT =====
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+# Navigate to repo
+%cd /content/HSGSP_pytorch
+
+# Fix 1: trainer.py - LabelSmoothingLoss parameter
+print("Applying Fix 1: trainer.py")
+with open('training/trainer.py', 'r') as f:
+    content = f.read()
+content = content.replace(
+    'loss_fn = LabelSmoothingLoss(label_smoothing=self.config.label_smoothing)',
+    'loss_fn = LabelSmoothingLoss(smoothing=self.config.label_smoothing)'
+)
+with open('training/trainer.py', 'w') as f:
+    f.write(content)
+print("✓ Fixed trainer.py")
+
+# Fix 2: data_loader.py - Transform order for CIFAR-10
+print("\nApplying Fix 2: data_loader.py")
+with open('data/data_loader.py', 'r') as f:
+    lines = f.readlines()
+
+# Find and fix the CIFAR-10 augment_transform section
+new_lines = []
+in_cifar10_augment = False
+skip_until_bracket = False
+
+for i, line in enumerate(lines):
+    if 'def load_cifar10' in line:
+        in_cifar10_augment = True
+    elif 'def load_cifar100' in line:
+        in_cifar10_augment = False
+    
+    if in_cifar10_augment and 'augment_transform = transforms.Compose([' in line:
+        # Replace the entire augment_transform block
+        indent = ' ' * (len(line) - len(line.lstrip()))
+        new_lines.append(f"{indent}augment_transform = transforms.Compose([\n")
+        new_lines.append(f"{indent}    transforms.RandomCrop(32, padding=4, padding_mode='reflect'),\n")
+        new_lines.append(f"{indent}    transforms.RandomHorizontalFlip(),\n")
+        new_lines.append(f"{indent}    transforms.ColorJitter(brightness=0.15, contrast=0.2, saturation=0.2),\n")
+        new_lines.append(f"{indent}    transforms.ToTensor(),\n")
+        new_lines.append(f"{indent}    transforms.RandomErasing(p=0.5, scale=(0.0625, 0.25), ratio=(1.0, 1.0), value=0.0),\n")
+        new_lines.append(f"{indent}]) if self.config.data_augmentation else base_transform\n")
+        skip_until_bracket = True
+        continue
+    
+    if skip_until_bracket:
+        if ']) if self.config.data_augmentation' in line:
+            skip_until_bracket = False
+        continue
+    
+    new_lines.append(line)
+
+with open('data/data_loader.py', 'w') as f:
+    f.writelines(new_lines)
+print("✓ Fixed data_loader.py")
+
+print("\n" + "="*50)
+print("All fixes applied successfully!")
+print("="*50)

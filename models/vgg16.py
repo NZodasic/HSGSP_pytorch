@@ -11,10 +11,13 @@ class VGG16:
 
     def build_vgg16_model(self, num_classes: int, input_shape: Tuple[int, int, int]) -> nn.Module:
         """Build VGG16 model with BatchNormalization"""
+        config = self.config  # Capture config for the inner class
+        
         class VGGForCIFAR10(nn.Module):
-            def __init__(self):
+            def __init__(self, config):
                 super().__init__()
-                in_channels = input_shape[2]
+                self.config = config
+                in_channels = input_shape[0]
                 self.features = nn.Sequential(
                     # Block 1
                     nn.Conv2d(in_channels, 64, kernel_size=3, padding=1),
@@ -108,14 +111,17 @@ class VGG16:
                 x = self.classifier(x)
                 return x
         
-        return VGGForCIFAR10()
+        return VGGForCIFAR10(config)
 
     def build_cifar100_model(self, num_classes: int, input_shape: Tuple[int, int, int]) -> nn.Module:
         """Build VGG16 model with BatchNormalization"""
+        config = self.config  # Capture config for the inner class
+        
         class VGGForCIFAR100(nn.Module):
-            def __init__(self):
+            def __init__(self, config):
                 super().__init__()
-                in_channels = input_shape[2]
+                self.config = config
+                in_channels = input_shape[0]
                 self.features = nn.Sequential(
                     # Block 1
                     nn.Conv2d(in_channels, 64, kernel_size=3, padding=1),
@@ -208,4 +214,4 @@ class VGG16:
                 x = self.classifier(x)
                 return x
         
-        return VGGForCIFAR100()
+        return VGGForCIFAR100(config)

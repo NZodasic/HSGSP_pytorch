@@ -174,12 +174,21 @@ class HSGSPTrainer:
                 def forward(self, pred, target):
                     pred = pred.log_softmax(dim=self.dim)
                     with torch.no_grad():
+                        # Handle one-hot encoded targets from data loader
+                        if target.dim() == 2 and target.size(1) == pred.size(1):
+                            # Target is already one-hot encoded, convert to class indices
+                            target_indices = target.argmax(dim=1)
+                        else:
+                            # Target is class indices
+                            target_indices = target
+                        
                         true_dist = torch.zeros_like(pred)
                         true_dist.fill_(self.smoothing / (pred.size(self.dim) - 1))
-                        true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
+                        true_dist.scatter_(1, target_indices.data.unsqueeze(1).long(), self.confidence)
                     return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
 
-            loss_fn = LabelSmoothingLoss(label_smoothing=self.config.label_smoothing)
+            loss_fn = LabelSmoothingLoss(smoothing=self.config.label_smoothing)
+            
         else:
             loss_fn = nn.CrossEntropyLoss()
 
@@ -222,8 +231,7 @@ class HSGSPTrainer:
 
         # Reduce LR on plateau (PyTorch version)
         reduce_lr = ReduceLROnPlateau(optimizer, mode='min', factor=self.config.reduce_lr_factor,
-                                      patience=self.config.reduce_lr_patience, min_lr=self.config.min_lr,
-                                      verbose=True) if self.config.reduce_lr_patience > 0 else None
+                                      patience=self.config.reduce_lr_patience, min_lr=self.config.min_lr) if self.config.reduce_lr_patience > 0 else None
 
         # TensorBoard
         log_dir = os.path.join(self.config.tensorboard_dir, datetime.now().strftime("%d%m%Y-%H%M%S"))
@@ -253,6 +261,9 @@ class HSGSPTrainer:
                 train_loss += loss.item()
                 _, predicted = outputs.max(1)
                 total += batch_y.size(0)
+                # Handle one-hot encoded labels
+                if batch_y.dim() == 2:
+                    batch_y = batch_y.argmax(dim=1)
                 train_correct += predicted.eq(batch_y).sum().item()
 
             train_loss /= len(train_loader)
@@ -342,6 +353,9 @@ class HSGSPTrainer:
                 loss += loss_fn(outputs, batch_y).item()
                 _, predicted = outputs.max(1)
                 total += batch_y.size(0)
+                # Handle one-hot encoded labels
+                if batch_y.dim() == 2:
+                    batch_y = batch_y.argmax(dim=1)
                 correct += predicted.eq(batch_y).sum().item()
         return loss / len(loader), correct / total
 
@@ -590,6 +604,9 @@ class HSGSPTrainer:
             train_loss += loss.item()
             _, predicted = outputs.max(1)
             total += batch_y.size(0)
+            # Handle one-hot encoded labels
+            if batch_y.dim() == 2:
+                batch_y = batch_y.argmax(dim=1)
             train_correct += predicted.eq(batch_y).sum().item()
         return train_loss / len(loader), train_correct / total
 
@@ -610,6 +627,9 @@ class HSGSPTrainer:
             student_outputs = distiller.student(batch_x)  # Assume
             _, predicted = student_outputs.max(1)
             total += batch_y.size(0)
+            # Handle one-hot encoded labels
+            if batch_y.dim() == 2:
+                batch_y = batch_y.argmax(dim=1)
             train_correct += predicted.eq(batch_y).sum().item()
         return train_loss / len(loader), train_correct / total
 

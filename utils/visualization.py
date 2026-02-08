@@ -94,7 +94,7 @@ class Visualizer:
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         
         # Plot loss
-        axes[0].plot(history['loss'], label='Train Loss')
+        axes[0].plot(history['train_loss'], label='Train Loss')
         axes[0].plot(history['val_loss'], label='Val Loss')
         axes[0].set_title('Model Loss')
         axes[0].set_xlabel('Epoch')
