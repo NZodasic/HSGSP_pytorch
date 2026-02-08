@@ -91,10 +91,29 @@ def main(args):
         torch.save(model.state_dict(), model_save_path)
         logger.info(f"Trained model saved at {model_save_path}")
         
-        visualizer.plot_training_history(
-            history,
-            save_path=os.path.join(config.plots_dir, 'training_history.png'),
-        )
+        # Adapt history keys for visualization compatibility
+        # Visualizer expects: 'loss', 'accuracy', 'val_loss', 'val_accuracy'
+        # Trainer provides: 'train_loss', 'train_acc', 'val_loss', 'val_acc'
+    
+        # Fix for visualization - ensure history has the keys visualizer expects
+        if 'train_loss' not in history and 'loss' in history:
+            history['train_loss'] = history['loss']
+        if 'train_acc' not in history and 'accuracy' in history:
+            history['train_acc'] = history['accuracy']
+        if 'val_loss' not in history:
+            history['val_loss'] = history.get('val_loss', [])
+        if 'val_acc' not in history and 'val_accuracy' in history:
+            history['val_acc'] = history['val_accuracy']
+
+        model_save_path = os.path.join(config.models_dir, f"{args.task}_trained_model.pth")
+        torch.save(model.state_dict(), model_save_path)
+        logger.info(f"Trained model saved at {model_save_path}")
+
+
+        # visualizer.plot_training_history(
+        #     history,
+        #     save_path=os.path.join(config.plots_dir, 'training_history.png'),
+        # )
     
     # FIXED: Create baseline copy AFTER training for proper evaluation
     baseline_for_eval = None
