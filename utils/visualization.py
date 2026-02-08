@@ -91,25 +91,71 @@ class Visualizer:
                             history: Dict[str, List],
                             save_path: Optional[str] = None):
         """Plot training history"""
+        # Debug: print available keys
+        print(f"Available keys in history: {list(history.keys())}")
+        
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         
+        # Flexible key matching - check all possible variations
+        # For training loss
+        train_loss_key = None
+        for key in ['clean_train_loss', 'train_loss', 'loss']:
+            if key in history:
+                train_loss_key = key
+                break
+        
+        # For validation loss
+        val_loss_key = None
+        for key in ['val_loss', 'validation_loss', 'clean_val_loss']:
+            if key in history:
+                val_loss_key = key
+                break
+        
+        # For training accuracy
+        train_acc_key = None
+        for key in ['clean_train_accuracy', 'train_accuracy', 'accuracy', 'train_acc']:
+            if key in history:
+                train_acc_key = key
+                break
+        
+        # For validation accuracy
+        val_acc_key = None
+        for key in ['val_accuracy', 'validation_accuracy', 'clean_val_accuracy', 'val_acc']:
+            if key in history:
+                val_acc_key = key
+                break
+        
         # Plot loss
-        axes[0].plot(history['train_loss'], label='Train Loss')
-        axes[0].plot(history['val_loss'], label='Val Loss')
-        axes[0].set_title('Model Loss')
-        axes[0].set_xlabel('Epoch')
-        axes[0].set_ylabel('Loss')
-        axes[0].legend()
-        axes[0].grid(True, alpha=0.3)
+        if train_loss_key:
+            axes[0].plot(history[train_loss_key], label='Train Loss')
+        if val_loss_key:
+            axes[0].plot(history[val_loss_key], label='Val Loss')
+        
+        if train_loss_key or val_loss_key:
+            axes[0].set_title('Model Loss')
+            axes[0].set_xlabel('Epoch')
+            axes[0].set_ylabel('Loss')
+            axes[0].legend()
+            axes[0].grid(True, alpha=0.3)
+        else:
+            axes[0].text(0.5, 0.5, 'No loss data available', 
+                        ha='center', va='center', transform=axes[0].transAxes)
         
         # Plot accuracy
-        axes[1].plot(history['accuracy'], label='Train Accuracy')
-        axes[1].plot(history['val_accuracy'], label='Val Accuracy')
-        axes[1].set_title('Model Accuracy')
-        axes[1].set_xlabel('Epoch')
-        axes[1].set_ylabel('Accuracy')
-        axes[1].legend()
-        axes[1].grid(True, alpha=0.3)
+        if train_acc_key:
+            axes[1].plot(history[train_acc_key], label='Train Accuracy')
+        if val_acc_key:
+            axes[1].plot(history[val_acc_key], label='Val Accuracy')
+        
+        if train_acc_key or val_acc_key:
+            axes[1].set_title('Model Accuracy')
+            axes[1].set_xlabel('Epoch')
+            axes[1].set_ylabel('Accuracy')
+            axes[1].legend()
+            axes[1].grid(True, alpha=0.3)
+        else:
+            axes[1].text(0.5, 0.5, 'No accuracy data available', 
+                        ha='center', va='center', transform=axes[1].transAxes)
         
         plt.tight_layout()
         
